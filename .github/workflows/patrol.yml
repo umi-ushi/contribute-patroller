@@ -1,0 +1,37 @@
+name: Patrolling My Contribution
+on: workflow_dispatch
+
+jobs:
+  patrolling:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set datetime range
+        env:
+          TZ: 'Asia/Tokyo'
+        run: |
+          echo "START_OF_THE_DAY=$(date -d "today 00:00:00" +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV \
+          echo "CURRENT_DATETIME=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
+      - uses: octokit/graphql-action@v2.x
+        id: get_my_contribution
+        with:
+          query: |
+            query contributions {
+              user(login: $userName) {
+                contributionsCollection(to: $to, from: $from) {
+                  contributionCalendar {
+                    weeks {
+                      contributionDays {
+                        date
+                        contributionCount
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          userName: ${{ github.actor }}
+          to: ${{ env.START_OF_THE_DAY }}
+          from: ${{ env.CURRENT_DATETIME }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: "echo 'latest release: ${{ steps.get_my_contribution.outputs.data }}'"
