@@ -9,15 +9,22 @@ jobs:
         env:
           TZ: 'Asia/Tokyo'
         run: |
-          echo "START_OF_THE_DAY=$(date -d "today 00:00:00" +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV \
-          echo "CURRENT_DATETIME=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
-      - uses: octokit/graphql-action@v2.x
+          echo "RANGE_START=$(date --utc --iso-8601='seconds' -d 'today 00:00:00')" >> $GITHUB_ENV
+          echo "RANGE_END=$(date --utc --iso-8601='seconds')" >> $GITHUB_ENV
+
+      - name: Get contribution
+        uses: octokit/graphql-action@v2.x
         id: get_my_contribution
         with:
+          # https://docs.github.com/ja/graphql/reference/queries#user
           query: |
-            query contributions {
-              user(login: $userName) {
-                contributionsCollection(to: $to, from: $from) {
+            query contributions(
+              $user: String! 
+              $from: DateTime!
+              $to: DateTime!
+            ) {
+              user(login: $user) {
+                contributionsCollection(to:$to, from:$from) {
                   contributionCalendar {
                     weeks {
                       contributionDays {
@@ -29,9 +36,10 @@ jobs:
                 }
               }
             }
-          userName: ${{ github.actor }}
-          to: ${{ env.START_OF_THE_DAY }}
-          from: ${{ env.CURRENT_DATETIME }}
+          variables: |
+            user: ${{ github.actor }}
+            from: ${{ env.RANGE_END }}
+            to: ${{ env.RANGE_START }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: "echo 'latest release: ${{ steps.get_my_contribution.outputs.data }}'"
+      - run: "echo 'data: ${{ steps.get_my_contribution.outputs.data }}'"
