@@ -42,4 +42,9 @@ jobs:
             to: ${{ env.RANGE_START }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: "echo 'data: ${{ steps.get_my_contribution.outputs.data }}'"
+
+      - name: Parse and get contributions count
+        run: |
+          CONTRIBUTIONS_COUNT=$(echo '${{ steps.get_my_contribution.outputs.data }}' | jq '.user.contributionsCollection.contributionCalendar.weeks[].contributionDays[].contributionCount')
+          echo "Today's contributions count: $CONTRIBUTIONS_COUNT"
+          echo "TODAY_CONTRIBUTIONS_COUNT=$TODAY_CONTRIBUTIONS_COUNT" >> $GITHUB_ENV
