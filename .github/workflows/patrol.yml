@@ -47,4 +47,12 @@ jobs:
         run: |
           CONTRIBUTIONS_COUNT=$(echo '${{ steps.get_my_contribution.outputs.data }}' | jq '.user.contributionsCollection.contributionCalendar.weeks[].contributionDays[].contributionCount')
           echo "Today's contributions count: $CONTRIBUTIONS_COUNT"
-          echo "TODAY_CONTRIBUTIONS_COUNT=$TODAY_CONTRIBUTIONS_COUNT" >> $GITHUB_ENV
+          echo "TODAY_CONTRIBUTIONS_COUNT=$CONTRIBUTIONS_COUNT" >> $GITHUB_ENV
+
+      - name: Post contributions count to slack
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_TITLE: Today's contributions count
+          SLACK_COLOR: good
+          SLACK_MESSAGE: Today's contributions count is 【 ${{ env.TODAY_CONTRIBUTIONS_COUNT }} 】.
