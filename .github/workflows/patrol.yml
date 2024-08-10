@@ -1,5 +1,8 @@
 name: Patrolling My Contribution
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 13 * * *'
 
 jobs:
   patrolling:
