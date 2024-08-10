@@ -8,13 +8,12 @@ jobs:
   patrolling:
     runs-on: ubuntu-latest
     steps:
-      - name: Set datetime range
-        id: set_datetime_range
+      - name: Get target date
+        id: get_target_date
         env:
           TZ: 'Asia/Tokyo'
         run: |
-          echo "RANGE_START=$(date --iso-8601='seconds' -d 'today 00:00:00')" >> "${GITHUB_OUTPUT}"
-          echo "RANGE_END=$(date --iso-8601='seconds')" >> "${GITHUB_OUTPUT}"
+          echo "TARGET_DATE=$(date -u +'%Y-%m-%dT00:00:00Z')" >> "${GITHUB_OUTPUT}"
 
       - name: Get contribution
         uses: octokit/graphql-action@v2.x
@@ -42,8 +41,8 @@ jobs:
             }
           variables: |
             user: ${{ github.actor }}
-            from: ${{ steps.set_datetime_range.outputs.RANGE_END }}
-            to: ${{ steps.set_datetime_range.outputs.RANGE_START }}
+            from: ${{ steps.get_target_date.outputs.TARGET_DATE }}
+            to: ${{ steps.get_target_date.outputs.TARGET_DATE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
