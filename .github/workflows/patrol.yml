@@ -29,12 +29,7 @@ jobs:
               user(login: $user) {
                 contributionsCollection(to:$to, from:$from) {
                   contributionCalendar {
-                    weeks {
-                      contributionDays {
-                        date
-                        contributionCount
-                      }
-                    }
+                    totalContributions
                   }
                 }
               }
@@ -49,7 +44,7 @@ jobs:
       - name: Parse and get contributions count
         id: parse_contributions_count
         run: |
-          CONTRIBUTIONS_COUNT=$(echo '${{ steps.get_my_contribution.outputs.data }}' | jq '.user.contributionsCollection.contributionCalendar.weeks[].contributionDays[].contributionCount')
+          CONTRIBUTIONS_COUNT=$(echo '${{ steps.get_my_contribution.outputs.data }}' | jq '.user.contributionsCollection.contributionCalendar.totalContributions')
           echo "Today's contributions count: $CONTRIBUTIONS_COUNT"
           echo "TODAY_CONTRIBUTIONS_COUNT=$CONTRIBUTIONS_COUNT" >> "${GITHUB_OUTPUT}"
 
